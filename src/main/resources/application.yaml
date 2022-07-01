@@ -1,0 +1,26 @@
+spring:
+  datasource:    url: "jdbc:h2:mem:sbh;MODE=PostgreSQL;NON_KEYWORDS=value,order;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS sbhs\\;SET SCHEMA sbhs"
+    username: sa
+    password: 
+  h2:    console:      enabled: true
+  jpa:    properties:
+      javax:
+        persistence:
+          sharedCache: 
+            #required - enable selective caching mode - only entities with @Cacheable annotation will use L2 cache.
+            mode: ENABLE_SELECTIVE 
+      hibernate:
+        #optional - enable SQL statements formatting.
+        format_sql: true 
+        #optional - generate statistics to check if L2/query cache is actually being used.
+        generate_statistics: true
+        cache:
+          #required - turn on L2 cache.
+          use_second_level_cache: true
+          #optional - turn on query cache.
+          use_query_cache: true 
+          region:
+            #required - classpath to cache region factory.
+            factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory   liquibase:    url: "jdbc:h2:mem:sbh;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS sbhs\\;SET SCHEMA sbhs"
+    user: sa
+    password:
