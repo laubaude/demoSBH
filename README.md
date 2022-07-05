@@ -1,6 +1,6 @@
 # demoSBH
-Example entity implementation that has a natural id. The use of the natural id of Hibernate allows code simplifications which can be made at the level of the 2 methods equals and hashCode. Using Lombok further increases the simplification. See en.lba.sbh.commons.AbstEntity.
-all the intelligence is [here](https://github.com/laubaude/demoSBH/blob/master/src/main/java/fr/lba/sbh/commons/AbstEntity.java "AbstEntity.java").
+Entity implementation example with hibernate natural id. Use of the natural id allows code simplifications, you don't have to code equals and hashCode methods. Using Lombok further increases the simplification. See en.lba.sbh.commons.AbstEntity.
+All is [here](https://github.com/laubaude/demoSBH/blob/master/src/main/java/fr/lba/sbh/commons/AbstEntity.java "AbstEntity.java").
 
 [![Java CI with Maven](https://github.com/laubaude/demoSBH/actions/workflows/maven.yml/badge.svg)](https://github.com/laubaude/demoSBH/actions/workflows/maven.yml)
 
@@ -33,6 +33,7 @@ public class Pet extends AbstEntity {
 ```
 
 ## Run & test
+
 - $ mvn spring-boot:run &
 - $ curl -X POST http://localhost:8080/api/pet/get -H 'Content-Type: application/json' -d '{"name":"Rex"}'
 
