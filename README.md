@@ -53,3 +53,4 @@ i.StatisticalLoggingSessionEventListener : Session Metrics {
 ```
 
 - Entity it's easy to write (only functional anotations), and you can saw that no sql statement execution, only cahe hits.
+
