@@ -1,8 +1,8 @@
 # demoSBH
+[![Java CI with Maven](https://github.com/laubaude/demoSBH/actions/workflows/maven.yml/badge.svg)](https://github.com/laubaude/demoSBH/actions/workflows/maven.yml)
+
 Entity implementation example with hibernate natural id. Use of the natural id allows code simplifications, you don't have to code equals and hashCode methods. Using Lombok further increases the simplification. See en.lba.sbh.commons.AbstEntity.
 All is [here](https://github.com/laubaude/demoSBH/blob/master/src/main/java/fr/lba/sbh/commons/AbstEntity.java "AbstEntity.java").
-
-[![Java CI with Maven](https://github.com/laubaude/demoSBH/actions/workflows/maven.yml/badge.svg)](https://github.com/laubaude/demoSBH/actions/workflows/maven.yml)
 
 
 ## Entity example
