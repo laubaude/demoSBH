@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -25,6 +27,7 @@ import fr.lba.sbh.model.Status;
 import fr.lba.sbh.services.PetService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@TestMethodOrder(OrderAnnotation.class)
 class DemoSbhApplicationTests {
 
 	private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -59,13 +62,25 @@ class DemoSbhApplicationTests {
 	private <T> T getFromId(String api, long id, Class<T> clazz) {
 		return (T) restTemplate.getForEntity(getUrl(api + "/get/" + id), clazz).getBody();
 	}
+	
+	private void print(Object obj) {
+		try {
+			System.out.println(obj.getClass().getSimpleName());
+			System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj));
+		} catch (JsonProcessingException e) {
+			System.out.println(e);
+		}
+	}
+
 
 	@Test
+	@org.junit.jupiter.api.Order(1)
 	void contextLoads() {
 		assertNotNull(petService);
 	}
 
 	@Test
+	@org.junit.jupiter.api.Order(2)
 	void pet() {
 		// getAll
 		Pet[] pets = getForEntity("pet", Pet[].class);
@@ -95,6 +110,7 @@ class DemoSbhApplicationTests {
 	}
 
 	@Test
+	@org.junit.jupiter.api.Order(3)
 	void customer() {
 		Address add = postForEntity("address", new Address("Beauregard", "Paris", "RP", "75001"));
 		assertTrue("Beauregard".equals(add.getStreet()));
@@ -104,6 +120,7 @@ class DemoSbhApplicationTests {
 	}
 
 	@Test
+	@org.junit.jupiter.api.Order(4)
 	void order() {
 		Pet pet = getFromNaturals("pet", new Pet("Rex", null, null));
 		Customer cust = getFromNaturals("customer", new Customer("Foo", null));
@@ -113,13 +130,5 @@ class DemoSbhApplicationTests {
 		print(order);
 	}
 
-	private void print(Object obj) {
-		try {
-			System.out.println(obj.getClass().getSimpleName());
-			System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj));
-		} catch (JsonProcessingException e) {
-			System.out.println(e);
-		}
-	}
-
+	
 }
