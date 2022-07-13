@@ -35,8 +35,6 @@ public class Order extends AbstEntity {
     @ManyToOne
     private Customer customer;
 
-    private Integer quantity;
-
     private LocalDate shipDate;
 
     @Enumerated(javax.persistence.EnumType.STRING)

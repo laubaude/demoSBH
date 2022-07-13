@@ -30,7 +30,7 @@ public abstract class CrudServices<T extends AbstEntity> {
         if (log.isDebugEnabled()) {
             log.debug("create()" + toJson(entite));
         }
-        return ResponseEntity.ok(repository.save(entite));
+        return ResponseEntity.ok(repository.saveAndFlush(entite));
     }
 
     @JsonRequestMapping(method = RequestMethod.POST, value = "/get")

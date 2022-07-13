@@ -31,108 +31,112 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @lombok.extern.slf4j.Slf4j
 @MappedSuperclass
 @JsonIdentityInfo(generator = JSOGGenerator.class)
 public abstract class AbstEntity implements Serializable {
 
-    private static final long serialVersionUID = 7901227851616301366L;
+	private static final long serialVersionUID = 7901227851616301366L;
 
-    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+	private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    @SequenceGenerator(name = "seq", sequenceName = "seq", initialValue = 1000)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
-    @Id
-    @lombok.Getter
-    @lombok.Setter
-    private long idTech;
+	@SequenceGenerator(name = "seq", sequenceName = "seq", initialValue = 1000)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
+	@Id
+	@Getter
+	@Setter
+	private long idTech;
 
-    // no maximum size and no expiration
-    private static Cache<Class<?>, List<PropertyDescriptor>> cache = CacheBuilder.newBuilder().build();
+	// no maximum size and no expiration
+	private static Cache<Class<? extends AbstEntity>, List<PropertyDescriptor>> cache = CacheBuilder.newBuilder()
+			.build();
 
-    @JsonIgnore
-    public Object invoke(final Object obj, final Method method) {
-        try {
-            return method.invoke(obj);
-        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw new PersistentObjectException(
-                    String.format("La classe %s, method %s. ", getClass().getSimpleName(), method.getName()) + e.getMessage());
-        }
-    }
+	@JsonIgnore
+	public Object invoke(final Object obj, final Method method) {
+		try {
+			return method.invoke(obj);
+		} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+			throw new PersistentObjectException(
+					String.format("La classe %s, method %s. ", getClass().getSimpleName(), method.getName())
+							+ e.getMessage());
+		}
+	}
 
-    @JsonIgnore
-    public List<PropertyDescriptor> getNaturalIdAccessor(final Class<?> classe) {
+	@JsonIgnore
+	public List<PropertyDescriptor> getNaturalIdAccessor(final Class<? extends AbstEntity> classe) {
 
-        List<PropertyDescriptor> result = cache.getIfPresent(classe);
-        if (result == null) {
-            final List<PropertyDescriptor> descriptors = new ArrayList<PropertyDescriptor>();
-            log.info("NaturalIdAccessor not in cache {} ", classe.getSimpleName());
-            ReflectionUtils.doWithFields(classe, new ReflectionUtils.FieldCallback() {
-                @Override
-                public void doWith(Field field) {
-                    final PropertyDescriptor descriptor = BeanUtils.getPropertyDescriptor(classe, field.getName());
-                    // si le champ à une annotation @NaturalID
-                    for (Annotation annotation : field.getDeclaredAnnotations()) {
-                        if (annotation.annotationType() == NaturalId.class) {
-                            descriptors.add(descriptor);
-                            log.debug("Entity : {}. Add field '{}' in the natural ID list.", classe, field.getName());
-                            break;
-                        }
-                    }
-                }
-            });
-            if (descriptors.size() == 0) {
-                // no natural Id -> get technical id
-                descriptors.add(BeanUtils.getPropertyDescriptor(classe, "idTech"));
-            }
-            cache.put(classe, descriptors);
-            result = descriptors;
-        }
-        return result;
-    }
+		List<PropertyDescriptor> result = cache.getIfPresent(classe);
+		if (result == null) {
+			final List<PropertyDescriptor> descriptors = new ArrayList<PropertyDescriptor>();
+			log.info("NaturalIdAccessor not in cache {} ", classe.getSimpleName());
+			ReflectionUtils.doWithFields(classe, new ReflectionUtils.FieldCallback() {
+				@Override
+				public void doWith(Field field) {
+					final PropertyDescriptor descriptor = BeanUtils.getPropertyDescriptor(classe, field.getName());
+					// if tag field is @NaturalID
+					for (Annotation annotation : field.getDeclaredAnnotations()) {
+						if (annotation.annotationType() == NaturalId.class) {
+							descriptors.add(descriptor);
+							log.debug("Entity : {}. Add field '{}' in the natural ID list.", classe, field.getName());
+							break;
+						}
+					}
+				}
+			});
+			if (descriptors.size() == 0) {
+				// no natural Id -> get technical id
+				descriptors.add(BeanUtils.getPropertyDescriptor(classe, "idTech"));
+			}
+			cache.put(classe, descriptors);
+			result = descriptors;
+		}
+		return result;
+	}
 
-    @JsonIgnore
-    public List<PropertyDescriptor> getNaturalIdAccessor() {
-        return getNaturalIdAccessor(this.getClass());
-    }
+	@JsonIgnore
+	public List<PropertyDescriptor> getNaturalIdAccessor() {
+		return getNaturalIdAccessor(this.getClass());
+	}
 
-    @Override
-    public String toString() {
-        StringBuilder value = new StringBuilder();
-        try {
-            value.append(this.getClass().getSimpleName()).append(' ').append(mapper.writeValueAsString(this));
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage(), e);
-        }
-        return value.toString();
-    }
+	@Override
+	public String toString() {
+		StringBuilder value = new StringBuilder();
+		try {
+			value.append(getClass().getSimpleName()).append(' ').append(mapper.writeValueAsString(this));
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage(), e);
+		}
+		return value.toString();
+	}
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (this == obj) {
-            return true;
-        }
-        if (getClass() == obj.getClass()) {
-            EqualsBuilder equalsBuilder = new EqualsBuilder();
-            for (PropertyDescriptor descriptor : getNaturalIdAccessor()) {
-                equalsBuilder.append(invoke(this, descriptor.getReadMethod()), invoke(obj, descriptor.getReadMethod()));
-            }
-            return equalsBuilder.isEquals();
-        } else {
-            return false;
-        }
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
+		if (getClass() == obj.getClass()) {  // don't use equals() because equals() method call '==' 
+			EqualsBuilder equalsBuilder = new EqualsBuilder();
+			// equals builder compare natural id each other
+			getNaturalIdAccessor().forEach(descriptor -> equalsBuilder.append(invoke(this, descriptor.getReadMethod()),
+					invoke(obj, descriptor.getReadMethod())));
+			return equalsBuilder.isEquals();
+		} else {
+			return false;
+		}
+	}
 
-    @Override
-    public int hashCode() {
-        HashCodeBuilder builder = new HashCodeBuilder(17, 37);
-        for (PropertyDescriptor descript : getNaturalIdAccessor()) {
-            builder.append(invoke(this, descript.getReadMethod()));
-        }
-        return builder.hashCode();
-    }
+	@Override
+	public int hashCode() {
+		HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+		// 
+		getNaturalIdAccessor().forEach(descriptor -> builder.append(invoke(this, descriptor.getReadMethod())));
+		return builder.hashCode();
+	}
 
 }

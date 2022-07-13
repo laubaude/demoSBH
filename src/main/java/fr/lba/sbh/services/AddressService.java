@@ -7,7 +7,7 @@ import fr.lba.sbh.commons.CrudServices;
 import fr.lba.sbh.model.Address;
 
 @RestController
-@RequestMapping("/api/Address")
+@RequestMapping("/api/address")
 public class AddressService extends CrudServices<Address> {
 
 }
